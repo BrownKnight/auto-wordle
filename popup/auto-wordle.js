@@ -30,7 +30,6 @@ function setEndpoint() {
 }
 
 function resetSettings() {
-  let value = document.getElementById("endpoint").value;
   browser.storage.sync.remove("endpoint").then(() => {
     showPage("settings");
   });
@@ -43,22 +42,24 @@ function resetSettings() {
 function listenForClicks() {
   document.addEventListener("click", (e) => {
     function requestState(tab) {
-      const sending = browser.tabs.sendMessage(tab.id, {
-        command: "readState",
-      });
-      sending.then((response) => {
-        state = response;
-        document.getElementById("current-state").innerHTML =
-          JSON.stringify(response);
-      }, reportError);
+      browser.tabs
+        .sendMessage(tab.id, {
+          command: "readState",
+        })
+        .then((response) => {
+          state = response;
+          document.getElementById("current-state").innerHTML =
+            JSON.stringify(response);
+        }, reportError);
     }
 
     function enterWord(word, tab) {
-      const sending = browser.tabs.sendMessage(tab.id, {
-        command: "enterWord",
-        word: word,
-      });
-      sending.catch(reportError);
+      browser.tabs
+        .sendMessage(tab.id, {
+          command: "enterWord",
+          word: word,
+        })
+        .catch(reportError);
     }
 
     function sendSolveWordleRequest() {
@@ -96,7 +97,6 @@ function listenForClicks() {
      * Get the active tab,
      * then call "beastify()" or "reset()" as appropriate.
      */
-    console.error("hi2");
     if (e.target.classList.contains("read-state")) {
       browser.tabs
         .query({ active: true, currentWindow: true })
@@ -115,11 +115,11 @@ function listenForClicks() {
 
   document
     .getElementById("settings-form")
-    .addEventListener("submit", (e) => setEndpoint());
+    .addEventListener("submit", (_) => setEndpoint());
 
   document
     .getElementById("reset-settings")
-    .addEventListener("click", (e) => resetSettings());
+    .addEventListener("click", (_) => resetSettings());
 }
 
 /**
@@ -131,17 +131,17 @@ function reportExecuteScriptError(error) {
   console.error(`Failed to execute beastify content script: ${error.message}`);
 }
 
-/**
- * When the popup loads, inject a content script into the active tab,
- * and add a click handler.
- * If we couldn't inject the script, handle the error.
- */
+// Inject the polyfill script
 browser.tabs.executeScript({ file: "/popup/browser-polyfill.js" });
+
+// Inject our content script which will listen to messages 
+// from us to read the state of the wordle game
 browser.tabs
   .executeScript({ file: "/content-scripts/auto-wordle-content.js" })
   .then(listenForClicks)
   .catch(reportExecuteScriptError);
 
+// Check to see if we have an endpoint configured, then set the page
 browser.storage.sync.get("endpoint").then((settings) => {
   console.log("endpoint", settings);
   if (settings.endpoint == null) {

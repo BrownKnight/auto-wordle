@@ -4,7 +4,6 @@
    * If this content script is injected into the same page again,
    * it will do nothing next time.
    */
-  console.error("hasRun");
   if (window.hasRun) {
     return;
   }
@@ -47,20 +46,19 @@
    * Remove every beast from the page.
    */
   function readState() {
+    // Each row is a collection of 5 elements, 1 per letter
     let gameRows = document
       .querySelector("game-app")
       .shadowRoot.querySelectorAll("game-row");
+    // Take the rows and map each to a word with the letter and it's evalution
     let words = [...gameRows].map((row) =>
       [...row.shadowRoot.querySelectorAll("game-tile")].map((x) => ({
         letter: x.getAttribute("letter"),
         evaluation: x.getAttribute("evaluation"),
       }))
     );
-    let gameTiles = words.reduce(
-      (previous, current) => previous.concat(...current),
-      []
-    );
 
+    // Read the state of all the letters from the games keyboard
     let letters = [
       ...document
         .querySelector("game-app")
@@ -70,6 +68,8 @@
       letter: x.getAttribute("data-key"),
       evaluation: x.getAttribute("data-state"),
     }));
+
+    // Return an object which will be sent directly as the request body
     return {
       current_state: words
         .map((x) =>
@@ -104,7 +104,6 @@
       // correctPositions: words.map((x) =>
       //   x.map((x) => (x.evaluation == "correct" ? x.letter : "_")).join("")
       // ),
-      // allTiles: gameTiles,
     };
   }
 
@@ -119,8 +118,4 @@
   }
 
   browser.runtime.onMessage.addListener(handleMessage);
-
-  document
-    .getElementById("game")
-    .addEventListener("game-last-tile-revealed-in-row", (_) => readState());
 })();
