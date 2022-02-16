@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "name": "AutoWordle",
+  "version": "1.0",
+  "description": "Uses a external API to automatically solve the current wordle puzzle",
+  "permissions": ["activeTab", "tabs", "http://*/*", "https://*/*"],
+  "icons": {
+    "32": "icons/w-32.png"
+  },
+  "browser_action": {
+    "default_icon": "icons/w-32.png",
+    "default_title": "AutoWordle",
+    "default_popup": "popup/auto-wordle.html"
+  }
+}
