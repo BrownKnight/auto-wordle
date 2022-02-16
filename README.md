@@ -1,2 +1,4 @@
 # auto-wordle
-A small WebExtension that uses a AWS Lambda API to solve your wordle problem
+
+A small WebExtension that uses a [AWS Lambda API](https://github.com/benjaminjellis/worlde-solver)
+to solve your wordle problem
