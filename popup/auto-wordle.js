@@ -1,7 +1,39 @@
 let state = {};
 
+function showPage(page) {
+  document.querySelector("#popup-content").classList.add("hidden");
+  document.querySelector("#error-content").classList.add("hidden");
+  document.querySelector("#settings-content").classList.add("hidden");
+
+  switch (page) {
+    case "settings":
+      document.querySelector("#settings-content").classList.remove("hidden");
+      break;
+    case "main":
+      document.querySelector("#popup-content").classList.remove("hidden");
+      break;
+    case "error":
+      document.querySelector("#error-content").classList.remove("hidden");
+      break;
+  }
+}
+
 function showMessage(message) {
   document.getElementById("current-state").innerHTML = message;
+}
+
+function setEndpoint() {
+  let value = document.getElementById("endpoint").value;
+  browser.storage.sync.set({ endpoint: value }).then(() => {
+    showPage("main");
+  });
+}
+
+function resetSettings() {
+  let value = document.getElementById("endpoint").value;
+  browser.storage.sync.remove("endpoint").then(() => {
+    showPage("settings");
+  });
 }
 
 /**
@@ -30,28 +62,27 @@ function listenForClicks() {
     }
 
     function sendSolveWordleRequest() {
-      // TODO: fetch the response from the server
-
       // Set the possible options as buttons
-      fetch(
-        "https://e6ee25qtw1.execute-api.eu-west-2.amazonaws.com/dev/generate-guesses",
-        {
+      browser.storage.sync.get("endpoint").then((settings) => {
+        fetch(settings.endpoint, {
           method: "POST",
           body: JSON.stringify(state),
-        }
-      )
-        .then((res) => res.json())
-        .then((res) => {
-          let options = res.word_suggestions;
-          let elements = options.map((option) => {
-            let element = document.createElement("button");
-            element.classList.add("word-entry");
-            element.setAttribute("data-word", option);
-            element.textContent = option;
-            return element;
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            let options = res.word_suggestions;
+            let elements = options.map((option) => {
+              let element = document.createElement("button");
+              element.classList.add("word-entry");
+              element.setAttribute("data-word", option);
+              element.textContent = option;
+              return element;
+            });
+            document
+              .getElementById("current-state")
+              .replaceChildren(...elements);
           });
-          document.getElementById("current-state").replaceChildren(...elements);
-        });
+      });
     }
 
     /**
@@ -81,6 +112,14 @@ function listenForClicks() {
         .catch(reportError);
     }
   });
+
+  document
+    .getElementById("settings-form")
+    .addEventListener("submit", (e) => setEndpoint());
+
+  document
+    .getElementById("reset-settings")
+    .addEventListener("click", (e) => resetSettings());
 }
 
 /**
@@ -88,8 +127,7 @@ function listenForClicks() {
  * Display the popup's error message, and hide the normal UI.
  */
 function reportExecuteScriptError(error) {
-  document.querySelector("#popup-content").classList.add("hidden");
-  document.querySelector("#error-content").classList.remove("hidden");
+  showPage("error");
   console.error(`Failed to execute beastify content script: ${error.message}`);
 }
 
@@ -98,9 +136,17 @@ function reportExecuteScriptError(error) {
  * and add a click handler.
  * If we couldn't inject the script, handle the error.
  */
-console.error("alive");
 browser.tabs.executeScript({ file: "/popup/browser-polyfill.js" });
 browser.tabs
   .executeScript({ file: "/content-scripts/auto-wordle-content.js" })
   .then(listenForClicks)
   .catch(reportExecuteScriptError);
+
+browser.storage.sync.get("endpoint").then((settings) => {
+  console.log("endpoint", settings);
+  if (settings.endpoint == null) {
+    showPage("settings");
+  } else {
+    showPage("main");
+  }
+});

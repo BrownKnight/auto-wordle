@@ -7,8 +7,16 @@
   </head>
 
   <body>
+    <div id="settings-content">
+      <form id="settings-form" action="javascript:;">
+        <label for="endpoint">URL for endpoint</label>
+        <input id="endpoint" type="text" placeholder="Set Endpoint" />
+        <button type="submit">Submit</button>
+      </form>
+    </div>
     <div id="popup-content">
-      <div class="message">Message</div>
+      <button type="button" id="reset-settings">Reset Settings</button>
+      <div class="endpoint">Message</div>
       <div class="button read-state">Read State</div>
       <div class="button send-request">Send Request</div>
       <div id="current-state"></div>

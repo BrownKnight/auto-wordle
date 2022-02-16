@@ -3,7 +3,7 @@
   "name": "AutoWordle",
   "version": "1.0",
   "description": "Uses a external API to automatically solve the current wordle puzzle",
-  "permissions": ["activeTab", "tabs", "http://*/*", "https://*/*"],
+  "permissions": ["activeTab", "tabs", "http://*/*", "https://*/*", "storage"],
   "icons": {
     "32": "icons/w-32.png"
   },
