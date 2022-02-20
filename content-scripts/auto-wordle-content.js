@@ -76,7 +76,7 @@
           x.map((x) => (x.evaluation == "correct" ? x.letter : "_")).join("")
         )
         .filter((x) => x !== "_____")
-        .slice(-1)[0],
+        .slice(-1)[0] ?? ["_____"],
       excluded_letters: letters
         .filter((x) => x.evaluation == "absent")
         .map((x) => x.letter),
