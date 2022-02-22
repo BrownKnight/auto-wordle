@@ -11,5 +11,6 @@
     "default_icon": "icons/w-32.png",
     "default_title": "AutoWordle",
     "default_popup": "popup/auto-wordle.html"
-  }
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; object-src 'self'"
 }
