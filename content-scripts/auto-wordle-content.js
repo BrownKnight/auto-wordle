@@ -71,12 +71,13 @@
 
     // Return an object which will be sent directly as the request body
     return {
-      current_state: words
-        .map((x) =>
-          x.map((x) => (x.evaluation == "correct" ? x.letter : "_")).join("")
-        )
-        .filter((x) => x !== "_____")
-        .slice(-1)[0] ?? ["_____"],
+      current_state:
+        words
+          .map((x) =>
+            x.map((x) => (x.evaluation == "correct" ? x.letter : "_")).join("")
+          )
+          .filter((x) => x !== "_____")
+          .slice(-1)[0] ?? "_____",
       excluded_letters: letters
         .filter((x) => x.evaluation == "absent")
         .map((x) => x.letter),
