@@ -3,7 +3,7 @@
   "name": "AutoWordle",
   "version": "1.0",
   "description": "Uses a external API to automatically solve the current wordle puzzle",
-  "permissions": ["activeTab", "tabs", "http://*/*", "https://*/*", "storage"],
+  "permissions": ["activeTab", "tabs", "https://www.nytimes.com/games/wordle*", "storage"],
   "icons": {
     "32": "icons/w-32.png"
   },
@@ -12,5 +12,10 @@
     "default_title": "AutoWordle",
     "default_popup": "popup/auto-wordle.html"
   },
-  "content_security_policy": "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; object-src 'self'"
+  "content_security_policy": "script-src 'self' https://cdn.jsdelivr.net 'sha256-95f5e53d8dfe3023ce3dbe26af0d58f7ad7eef8e54dd694341570e5dd7214907='; object-src 'self'",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{aa48963a-274e-461d-8a9d-61a2965f2f68}"
+    }
+  }
 }
