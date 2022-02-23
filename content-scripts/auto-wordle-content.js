@@ -87,5 +87,6 @@
     .shadowRoot.querySelector("game-theme-manager")
     .querySelector("#game")
     .addEventListener("game-last-tile-revealed-in-row", () => browser.runtime.sendMessage({ command: "refresh" }));
+
   browser.runtime.onMessage.addListener(handleMessage);
 })();

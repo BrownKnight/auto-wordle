@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   width: 300px;
 }
 
@@ -6,26 +7,26 @@ html, body {
   display: none;
 }
 
-.button {
-  margin: 3% auto;
-  padding: 4px;
-  text-align: center;
-  font-size: 1.5em;
-  cursor: pointer;
+.loading-skeleton .list-group-item {
+  color: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #eee;
+  border-color: #ccc;
 }
 
-.beast:hover {
-  background-color: #CFF2F2;
+.loading-skeleton .list-group-item::placeholder {
+  color: transparent;
 }
-
-.beast {
-  background-color: #E5F2F2;
+@keyframes loading-skeleton {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
 }
-
-.reset {
-  background-color: #FBFBC9;
-}
-
-.reset:hover {
-  background-color: #EAEA9D;
+.loading-skeleton {
+  pointer-events: none;
+  animation: loading-skeleton 1s infinite alternate;
 }

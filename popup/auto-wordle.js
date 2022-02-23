@@ -16,10 +16,6 @@ function showPage(page) {
   }
 }
 
-function showMessage(message) {
-  document.getElementById("current-state").innerHTML = message;
-}
-
 function setEndpoint() {
   let value = document.getElementById("endpoint").value;
   browser.storage.sync.set({ endpoint: value }).then(() => {
@@ -33,23 +29,58 @@ function resetSettings() {
   });
 }
 
-function requestState(tab) {
+function requestState() {
   browser.tabs
-    .sendMessage(tab.id, {
-      command: "readState",
+    .query({ active: true, currentWindow: true })
+    .then((tabs) => {
+      browser.tabs
+        .sendMessage(tabs[0].id, {
+          command: "readState",
+        })
+        .then((response) => {
+          sendSolveWordleRequest(response);
+        }, reportError);
     })
-    .then((response) => {
-      sendSolveWordleRequest(response);
-    }, reportError);
+    .catch(reportError);
+}
+
+function setLoadingState(state) {
+  if (state) {
+    document.getElementById("suggestions").classList.add("loading-skeleton");
+    let items = Array(5).fill("Loading...").map(addListItem);
+    document.getElementById("suggestions").replaceChildren(...items);
+  } else {
+    document.getElementById("suggestions").classList.remove("loading-skeleton");
+  }
+}
+
+function getLoadingState() {
+  return document.getElementById("suggestions").classList.contains("loading-skeleton");
 }
 
 function enterWord(word, tab) {
+  setLoadingState(true);
+  setTimeout(() => {
+    currentState = getLoadingState();
+    if (currentState) {
+      requestState();
+    }
+  }, 2000);
   browser.tabs
     .sendMessage(tab.id, {
       command: "enterWord",
       word: word,
     })
     .catch(reportError);
+}
+
+function addListItem(name) {
+  let element = document.createElement("a");
+  element.classList.add("word-entry", "list-group-item", "list-group-item-action");
+  element.href = "#";
+  element.setAttribute("data-word", name);
+  element.textContent = name;
+  return element;
 }
 
 function sendSolveWordleRequest(state) {
@@ -62,15 +93,9 @@ function sendSolveWordleRequest(state) {
       .then((res) => res.json())
       .then((res) => {
         let options = res.word_suggestions;
-        let elements = options.map((option) => {
-          let element = document.createElement("a");
-          element.classList.add("word-entry", "list-group-item", "list-group-item-action");
-          element.href = "#";
-          element.setAttribute("data-word", option);
-          element.textContent = option;
-          return element;
-        });
+        let elements = options.map(addListItem);
         document.getElementById("suggestions").replaceChildren(...elements);
+        setLoadingState(false);
       });
   });
 }
@@ -93,10 +118,7 @@ function listenForClicks() {
      * then call "beastify()" or "reset()" as appropriate.
      */
     if (e.target.classList.contains("load-suggestions")) {
-      browser.tabs
-        .query({ active: true, currentWindow: true })
-        .then((tabs) => requestState(tabs[0]))
-        .catch(reportError);
+      requestState();
     } else if (e.target.classList.contains("word-entry")) {
       // Ask the content script to send keyboard inputs for the given word
       browser.tabs
@@ -114,10 +136,7 @@ function listenForClicks() {
 browser.runtime.onMessage.addListener((request) => {
   switch (request.command) {
     case "refresh":
-      browser.tabs
-        .query({ active: true, currentWindow: true })
-        .then((tabs) => requestState(tabs[0]))
-        .catch(reportError);
+      requestState();
   }
 });
 
@@ -138,6 +157,7 @@ browser.tabs.executeScript({ file: "/popup/browser-polyfill.js" });
 browser.tabs.executeScript({ file: "/content-scripts/auto-wordle-content.js" }).then(listenForClicks).catch(reportExecuteScriptError);
 
 // Check to see if we have an endpoint configured, then set the page
+showPage("main");
 browser.storage.sync.get("endpoint").then((settings) => {
   console.log("endpoint", settings);
   if (settings.endpoint == null) {
